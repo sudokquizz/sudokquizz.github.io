@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Privacy — SudokQuizz</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+    <style>
+      .privacy-container{max-width:900px;margin:28px auto;padding:0 16px;color:var(--white)}
+      .privacy-meta{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+      .lang-switch{margin-left:auto}
+      .md-content h1,.md-content h2,.md-content h3{color:var(--accent)}
+      .md-content p{color:var(--muted)}
+      .md-content a{color:var(--link)}
+      pre{background:#071018;padding:12px;border-radius:6px;overflow:auto}
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <img class="app-icon" src="./assets/icon/ic_launcher_512.png" alt="SudokQuizz icon" onerror="this.style.display='none'" />
+        <div>
+          <div class="top-row" style="display:flex;align-items:center;gap:12px;justify-content:space-between;">
+            <div>
+              <h1 data-i18n="title">SudokQuizz</h1>
+              <p class="tag" data-i18n="tag">Sudoku + Quiz — train your logic and knowledge</p>
+            </div>
+            <div class="lang-switch" aria-label="Language switch">
+              <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+              <button class="lang-btn" data-lang="fr" onclick="setLang('fr')">FR</button>
+              <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+            </div>
+          </div>
+          <p class="lead" data-i18n="lead">Solve grids, answer quizzes and train your brain. Free on Google Play.</p>
+          <div class="actions">
+            <a class="btn primary" href="./index.html#download" data-i18n="download_btn">Download</a>
+            <a class="btn ghost" href="./index.html" data-i18n="home_btn">Home</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="privacy-container">
+ 
+
+      <div id="md-loading">Loading policy…</div>
+      <article class="md-content" id="policy-content"></article>
+    </main>
+
+    <script>
+      // only local markdown files are used; no remote fallback
+      // language detection: query param > localStorage > default 'en'
+      const qsLang = (new URLSearchParams(location.search)).get('lang');
+      let lang = qsLang || localStorage.getItem('site_lang') || 'en';
+
+      const TITLES = {
+        en: 'Privacy policy',
+        fr: 'Politique de confidentialité',
+        es: 'Política de privacidad'
+      };
+      async function loadLangFile(l){
+        try{
+          const res = await fetch(`./lang/${l}.json`, {cache: 'no-cache'});
+          if(!res.ok) throw new Error('not found');
+          return await res.json();
+        }catch(e){ return null; }
+      }
+
+      function applyTranslations(t){
+        if(!t) return;
+        document.querySelectorAll('[data-i18n]').forEach(el=>{
+          const key = el.getAttribute('data-i18n');
+          if(t[key]!==undefined) el.textContent = t[key];
+        });
+        try{ document.documentElement.lang = lang; }catch(e){}
+      }
+
+      async function setLang(l){
+        lang = l;
+        try{ document.documentElement.lang = l; }catch(e){}
+        document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.getAttribute('data-lang')===l));
+        const title = TITLES[l] || TITLES.en;
+        const policyTitle = document.getElementById('policy-title');
+        if(policyTitle) policyTitle.textContent = title;
+        const headerH1 = document.querySelector('header h1');
+        if(headerH1) headerH1.textContent = title;
+        try{ localStorage.setItem('site_lang', l); }catch(e){}
+        // load translations for the page
+        const t = await loadLangFile(l) || await loadLangFile('en');
+        applyTranslations(t);
+        loadPolicy();
+      }
+
+      async function loadPolicy(){
+        const el = document.getElementById('policy-content');
+        const loading = document.getElementById('md-loading');
+        loading.style.display = 'block';
+        el.innerHTML = '';
+
+        // select local file: fr/es when explicitly selected, otherwise en
+        const sourceLang = (lang === 'fr') ? 'fr' : (lang === 'es' ? 'es' : 'en');
+        const localPath = `./lang/privacy_${sourceLang}.md`;
+
+        try{
+          const res = await fetch(localPath, {cache: 'no-cache'});
+          if(res && res.ok){
+            const md = await res.text();
+            el.innerHTML = markdownToHtml(md);
+          } else {
+            el.innerHTML = `<p>Le fichier de politique local est introuvable : <code>${localPath}</code>.</p><p>Veuillez ajouter le fichier correspondant dans <code>sudokquizz_WEB/lang/</code>.</p>`;
+          }
+        }catch(e){
+          el.innerHTML = `<p>Erreur lors du chargement du fichier local : <code>${localPath}</code>.</p>`;
+        }finally{ loading.style.display = 'none'; }
+      }
+
+      // Very small markdown -> html converter (handles headings, lists, paragraphs, links, code blocks)
+      function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+      function markdownToHtml(md){
+        // normalize
+        const lines = md.replace(/\r/g,'').split('\n');
+        let html = '';
+        let inList = false;
+        let inCode = false;
+        let codeBuf = [];
+
+        function closeList(){ if(inList){ html += '</ul>'; inList=false; } }
+        function closeCode(){ if(inCode){ html += '<pre><code>'+escapeHtml(codeBuf.join('\n'))+'</code></pre>'; inCode=false; codeBuf=[]; } }
+
+        for(let line of lines){
+          if(line.startsWith('```')){ if(inCode){ // close
+              closeCode();
+            } else { inCode=true; codeBuf=[]; }
+            continue;
+          }
+          if(inCode){ codeBuf.push(line); continue; }
+
+          const h = line.match(/^(#{1,6})\s+(.*)$/);
+          const li = line.match(/^[-*+]\s+(.*)$/);
+          if(h){ closeList(); const level = h[1].length; html += `<h${level}>${inlineMd(h[2])}</h${level}>`; continue; }
+          if(li){ if(!inList){ inList = true; html += '<ul>'; } html += `<li>${inlineMd(li[1])}</li>`; continue; }
+          if(line.trim()===''){ closeList(); html += '<p></p>'; continue; }
+          html += `<p>${inlineMd(line)}</p>`;
+        }
+        closeCode(); closeList();
+        return html;
+      }
+
+      function inlineMd(text){
+        // links [text](url)
+        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m,t,u)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`);
+        // bold **text**
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        // italics *text*
+        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        return text;
+      }
+
+      // initialize
+      document.addEventListener('DOMContentLoaded', ()=>{ setLang(lang); });
+    </script>
+  </body>
+</html>
