@@ -1,0 +1,72 @@
+:root{
+  --bg:#0f1724;
+  --card:#0b1220;
+  --accent:#51a4ea;
+  --link:#bfefff;
+  --muted:#9aa6b2;
+  --white:#ffffff;
+}
+*{box-sizing:border-box}
+body{font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:linear-gradient(180deg,#071021 0%, #071726 100%);color:var(--white);-webkit-font-smoothing:antialiased}
+.container{max-width:1000px;margin:32px auto;padding:0 16px}
+.hero{padding:28px 0 8px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.hero-inner{display:flex;gap:18px;align-items:center;max-width:1000px;margin:0 auto}
+.app-icon{width:84px;height:84px;border-radius:18px;background:#fff;padding:8px;object-fit:contain}
+.hero h1{margin:0;font-size:32px}
+.tag{color:var(--accent);margin:6px 0;font-weight:600}
+.lead{color:var(--muted);max-width:640px}
+.actions{margin-top:12px}
+.btn{display:inline-block;padding:10px 16px;border-radius:8px;text-decoration:none;color:var(--white);margin-right:8px}
+.btn.primary{background:var(--accent)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+.feature-graphic{width:100%;max-height:240px;object-fit:cover;margin-top:18px;border-radius:6px}
+h2{color:var(--accent);margin-top:24px}
+.features-list{columns:2;list-style:none;padding:0;margin:8px 0 16px;color:var(--muted)}
+.gallery{display:flex;gap:12px;flex-wrap:wrap}
+.gallery img{width:31%;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,0.04)}
+/* gallery video behaves as a block above the thumbnails */
+.gallery{position:relative}
+.gallery .gallery-video{display:block;border-radius:8px;max-width:100%;background:#000;width:100%;max-width:880px;margin:0 auto 12px}
+.gallery img{width:31%;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,0.04)}
+video{display:block;border-radius:8px;max-width:100%;background:#000}
+.note{color:var(--muted);font-size:13px}
+.footer{border-top:1px solid rgba(255,255,255,0.03);padding:18px 0;margin-top:36px;color:var(--muted)}
+
+.lang-switch{display:flex;gap:6px}
+.lang-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white);padding:6px 8px;border-radius:6px;cursor:pointer}
+.lang-btn.active{background:var(--white);color:var(--accent);font-weight:700}
+.privacy-link{color:var(--link);text-decoration:underline;margin-left:6px}
+
+/* Small Play Store badge next to download link */
+.play-badge{width:120px;height:auto;margin-left:12px;border-radius:6px;object-fit:contain;align-self:center}
+.download-link{color:var(--link);text-decoration:underline;margin-left:6px}
+
+@media (max-width:720px){
+  .play-badge{width:84px}
+}
+
+/* Global link styles for better contrast on dark background */
+a{color:var(--link);text-decoration:underline}
+a:hover,a:focus{color:var(--white);text-decoration:underline}
+a:focus{outline:2px solid rgba(191,239,255,0.18);outline-offset:2px}
+
+/* Ensure footer privacy link is visible */
+#footer-privacy-link{color:var(--link)}
+#footer-privacy-link:hover,#footer-privacy-link:focus{color:var(--white)}
+
+/* Keep privacy text and link aligned on the same row when possible */
+#privacy p{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+
+/* Keep download text and link aligned on the same row when possible */
+#download p{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+
+@media (max-width:720px){
+  .hero-inner{flex-direction:column;align-items:flex-start}
+  .gallery img{width:48%}
+  .features-list{columns:1}
+}
+
+@media (max-width:520px){
+  .gallery img{width:100%}
+  .gallery .gallery-video{width:100%}
+}
